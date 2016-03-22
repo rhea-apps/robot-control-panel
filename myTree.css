@@ -1,0 +1,13 @@
+.myTree .tree-cell {
+    -fx-background-color: #000000 ;
+    -fx-text-fill: #ffffff ;
+}
+.myTree .tree-cell:selected {
+    -fx-font-weight: bold ;
+}
+.tree-cell > .tree-disclosure-node > .arrow  {
+    -fx-background-color: #ffffff;
+}
+.tree-cell:expanded > .tree-disclosure-node > .arrow {
+    -fx-background-color: #ffffff;
+}

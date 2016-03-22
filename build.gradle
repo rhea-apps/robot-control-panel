@@ -1,0 +1,32 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'application'
+mainClassName = 'control_panel.ControlPanel'
+
+repositories {		
+	mavenCentral()
+	maven { url "https://github.com/rosjava/rosjava_mvn_repo/raw/master/" }
+	maven { url "https://jitpack.io" }
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+configurations.all {    
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+dependencies {	
+	// RHEA
+	compile 'com.github.rhea-flow:rhea-core:-SNAPSHOT'  
+	compile 'com.github.rhea-flow:rx-eval:-SNAPSHOT'
+ 	compile 'com.github.rhea-flow:ros-eval:-SNAPSHOT'
+ 	compile 'com.github.rhea-apps:cv-bridge:-SNAPSHOT'
+
+ 	// rosjava
+	compile 'org.ros.rosjava_messages:sensor_msgs:1.11.7'
+	compile 'org.ros.rosjava_messages:geometry_msgs:1.11.7'  
+  	compile 'org.ros.rosjava_messages:tf:1.11.4'
+}
+task wrapper(type: Wrapper) {
+	gradleVersion = '2.3'
+}
