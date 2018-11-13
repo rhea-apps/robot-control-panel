@@ -3,29 +3,42 @@ apply plugin: 'idea'
 apply plugin: 'application'
 mainClassName = 'control_panel.ControlPanel'
 
-repositories {		
+repositories {
 	mavenCentral()
+	jcenter()
 	maven { url "https://github.com/rosjava/rosjava_mvn_repo/raw/master/" }
 	maven { url "https://jitpack.io" }
+	flatDir {
+		dirs 'libs'
+  }
 }
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-configurations.all {    
+configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
-dependencies {	
+dependencies {
 	// RHEA
-	compile 'com.github.rhea-flow:rhea-core:-SNAPSHOT'  
+	compile 'com.github.rhea-flow:rhea-core:-SNAPSHOT'
 	compile 'com.github.rhea-flow:rx-eval:-SNAPSHOT'
  	compile 'com.github.rhea-flow:ros-eval:-SNAPSHOT'
  	compile 'com.github.rhea-apps:cv-bridge:-SNAPSHOT'
 
  	// rosjava
-	compile 'org.ros.rosjava_messages:sensor_msgs:1.11.7'
-	compile 'org.ros.rosjava_messages:geometry_msgs:1.11.7'  
-  	compile 'org.ros.rosjava_messages:tf:1.11.4'
+	// compile 'org.ros.rosjava_messages:sensor_msgs:1.11.7'
+	compile 'org.ros.rosjava_messages:sensor_msgs:1.12.6'
+	// compile 'org.ros.rosjava_messages:geometry_msgs:1.11.7'
+	compile 'org.ros.rosjava_messages:geometry_msgs:1.12.6'
+  // compile 'org.ros.rosjava_messages:tf:1.11.4'
+  compile 'org.ros.rosjava_messages:tf:1.11.9'
+  // compile 'org.ros.rosjava_messages:tf2_msgs:0.5.9'
+
+  // OpenCV
+	compile 'org.openpnp:opencv:2.4.11-2'
+	compile fileTree(dir: 'libs', include: ['*.jar'])
+	runtime fileTree(dir: 'libs', include: ['*.jar'])
 }
 task wrapper(type: Wrapper) {
 	gradleVersion = '2.3'

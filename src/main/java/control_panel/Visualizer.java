@@ -30,7 +30,8 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
-import org.opencv.highgui.Highgui;
+// import org.opencv.highgui.Highgui;
+import org.opencv.imgcodecs.Imgcodecs;
 
 import java.awt.*;
 import java.io.ByteArrayInputStream;
@@ -41,6 +42,12 @@ import java.util.concurrent.CountDownLatch;
 
 
 public class Visualizer extends Application implements Runnable {
+    static {
+        System.out.println(System.getProperty("java.library.path"));
+        System.loadLibrary(org.opencv.core.Core.NATIVE_LIBRARY_NAME);
+        nu.pattern.OpenCV.loadShared();
+    }
+
     public static final CountDownLatch latch = new CountDownLatch(1);
     public static Visualizer viz = null;
     public static boolean faceDetection = false;
@@ -49,7 +56,6 @@ public class Visualizer extends Application implements Runnable {
     public final TreeItem<String> root = new TreeItem<String>("TF");
     public final ProgressBar battery = new ProgressBar();
     public final ImageView imageRGB = new ImageView();
-    public final ImageView imageDepth = new ImageView();
 
     // Setup
     public Visualizer() { set(this); }
@@ -77,38 +83,18 @@ public class Visualizer extends Application implements Runnable {
         RowConstraints r1 = new RowConstraints(); r1.setPercentHeight(10);
         RowConstraints r2 = new RowConstraints(); r2.setPercentHeight(80);
         RowConstraints r3 = new RowConstraints(); r3.setPercentHeight(10);
-        ColumnConstraints c1 = new ColumnConstraints(); c1.setPercentWidth(40);
-        ColumnConstraints c2 = new ColumnConstraints(); c2.setPercentWidth(20);
+        ColumnConstraints c1 = new ColumnConstraints(); c1.setPercentWidth(70);
+        ColumnConstraints c2 = new ColumnConstraints(); c2.setPercentWidth(30);
         grid.getRowConstraints().addAll(r1, r2, r3);
-        grid.getColumnConstraints().addAll(c1, c1, c2);
+        grid.getColumnConstraints().addAll(c1, c2);
 
         // Titles
-        Text t1 = new Text("RGB Image");
-        t1.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        t1.setFill(Color.WHITE);
-        HBox title1 = new HBox(t1);
-        title1.setAlignment(Pos.CENTER);
-        title1.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-
-        Text t2 = new Text("Depth Image");
-        t2.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        t2.setFill(Color.WHITE);
-        HBox title2 = new HBox(t2);
-        title2.setAlignment(Pos.CENTER);
-        title2.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-
-        Text t3 = new Text("TF Structure");
-        t3.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        t3.setFill(Color.WHITE);
-        HBox title3 = new HBox(t3);
-        title3.setAlignment(Pos.CENTER);
-        title3.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        HBox title1 = createTitle("Camera feed");
+        HBox title2 = createTitle("TF Structure");
 
         // Images
         BorderPane rgb = new BorderPane();
         rgb.setCenter(new ImageViewPane(imageRGB));
-        BorderPane depth = new BorderPane();
-        depth.setCenter(new ImageViewPane(imageDepth));
 
         // FaceDetection checkbox
         CheckBox faceCheck = new CheckBox("Face Detection"); faceCheck.setTextFill(Color.WHITE);
@@ -130,24 +116,23 @@ public class Visualizer extends Application implements Runnable {
         tree.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
 
         // Insert components to grid
-        grid.add(title1, 0, 0); grid.add(title2, 1, 0); grid.add(title3, 2, 0);
-        grid.add(battery, 0, 2, 3, 1);
-        grid.add(rgb, 0, 1); grid.add(depth, 1, 1);
-        grid.add(tree, 2, 1);
+        grid.add(title1, 0, 0);
+        grid.add(rgb, 0, 1);
+        grid.add(title2, 1, 0);
+        grid.add(tree, 1, 1);
+        grid.add(battery, 0, 2, 2, 1);
 
         // Scene
         Scene scene = new Scene(grid, Color.BLACK);
         File f = new File("myTree.css");
         scene.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
         stage.setScene(scene);
-        stage.setTitle("Remote Monitor-Control Application");
+        stage.setTitle("Remote Robot-Control Panel");
         stage.setFullScreen(true);
         stage.show();
     }
 
     public void displayRGB(Mat mat) { Platform.runLater(() -> setImage(mat, imageRGB)); }
-
-    public void displayDepth(Mat mat) { Platform.runLater(() -> setImage(mat, imageDepth)); }
 
     public void displayBattery(double percentage) { Platform.runLater(() -> battery.setProgress(percentage)); }
 
@@ -172,8 +157,18 @@ public class Visualizer extends Application implements Runnable {
 
     private void setImage(Mat mat, ImageView imv) {
         MatOfByte byteMat = new MatOfByte();
-        Highgui.imencode(".bmp", mat, byteMat);
+        Imgcodecs.imencode(".bmp", mat, byteMat);
         imv.setImage(new Image(new ByteArrayInputStream(byteMat.toArray())));
+    }
+
+    private HBox createTitle(String title) {
+        Text t = new Text(title);
+        t.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        t.setFill(Color.WHITE);
+        HBox box = new HBox(t);
+        box.setAlignment(Pos.CENTER);
+        box.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        return box;
     }
 
     private class ImageViewPane extends Region {
